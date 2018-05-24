@@ -1,0 +1,10 @@
+run
+{
+{% for num in range(1, parallel+1) %}  
+allocate auxiliary channel aux{{ num }} type disk;
+{% endfor %}
+{%  if until_time is not none%}
+    {{ until_time }}
+{% endif %}
+duplicate database to {{ sid }} backup location='{{ bkploc }}';
+}

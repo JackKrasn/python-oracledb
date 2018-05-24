@@ -1,0 +1,60 @@
+
+Rebuiling roles and views...
+Enable Resticted Session...
+BEGIN rtl.lock_stop; END;
+
+*
+ошибка в строке 1:
+ORA-01031: привилегий недостаточно
+ORA-06512: на  "SYS.DBMS_SESSION", line 114
+ORA-06512: на  "IBS.RTL", line 3674
+ORA-06512: на  "IBS.RTL", line 3763
+ORA-06512: на  "IBS.RTL", line 6129
+ORA-06512: на  line 1
+
+
+BEGIN rtl.lock_stop; END;
+
+*
+ошибка в строке 1:
+ORA-01031: привилегий недостаточно
+ORA-06512: на  "SYS.DBMS_SESSION", line 114
+ORA-06512: на  "IBS.RTL", line 3674
+ORA-06512: на  "IBS.RTL", line 3763
+ORA-06512: на  "IBS.RTL", line 6129
+ORA-06512: на  line 1
+
+
+Creating Roles...
+DROP ROLE IBS_USER
+ORA-01924: роль 'IBS_USER' не разрешена или не существует
+DROP ROLE IBS_ADMIN
+ORA-01924: роль 'IBS_ADMIN' не разрешена или не существует
+DROP ROLE IBS_UADMIN
+ORA-01924: роль 'IBS_UADMIN' не разрешена или не существует
+DROP ROLE IBS_PICKER
+ORA-01924: роль 'IBS_PICKER' не разрешена или не существует
+DROP ROLE IBS_UPICKER
+ORA-01924: роль 'IBS_UPICKER' не разрешена или не существует
+DROP ROLE IBS_REVISOR
+ORA-01924: роль 'IBS_REVISOR' не разрешена или не существует
+DROP ROLE IBS_PDADMIN
+ORA-01924: роль 'IBS_PDADMIN' не разрешена или не существует
+DROP ROLE IBS_APPADM
+ORA-01924: роль 'IBS_APPADM' не разрешена или не существует
+DROP ROLE IBS_APPSRV
+ORA-01924: роль 'IBS_APPSRV' не разрешена или не существует
+Grant roles to active users...
+Disable Restricted Session...
+30074
+Rebuilding System Views...
+Create_Vw_Ac_Fin: ORA-00942: таблица или представление пользователя не существует
+Create_Vw_Document: ORA-00904: "C_DOCUMENT_DATE": недопустимый идентификатор
+Create_Vw_Object_Users: ORA-00942: таблица или представление пользователя не существует
+Create_Vw_Object_Cat_Users: ORA-00942: таблица или представление пользователя не существует
+Create_Vw_Nu: ORA-00942: таблица или представление пользователя не существует
+Generating report roles...
+CREATE ROLE IBS$ALL_REPORTS$ - OK
+Granting report roles to users...
+***IBS
+Rebuiling roles and views done.

@@ -1,0 +1,2 @@
+CONFIGURE DEVICE TYPE DISK PARALLELISM {{ parallel }} BACKUP TYPE TO COMPRESSED BACKUPSET;
+backup check logical TAG '{{ tag }}' database format '{{ bkploc }}/db_%U.bck' keep until time 'sysdate + {{ keep_day }}';

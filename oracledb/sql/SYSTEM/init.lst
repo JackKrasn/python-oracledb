@@ -1,0 +1,48 @@
+SP2-0310: не в состоянии открыть файл "usr_sets.sql"
+DEFINE _DATE           = "17/11/2017" (CHAR)
+DEFINE _CONNECT_IDENTIFIER = "rfo_dev" (CHAR)
+DEFINE _USER           = "SYS" (CHAR)
+DEFINE _PRIVILEGE      = "AS SYSDBA" (CHAR)
+DEFINE _SQLPLUS_RELEASE = "1102000100" (CHAR)
+DEFINE _EDITOR         = "Notepad" (CHAR)
+DEFINE _O_VERSION      = "Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options" (CHAR)
+DEFINE _O_RELEASE      = "1102000400" (CHAR)
+DEFINE AUDM_OWNER      = "AUDM" (CHAR)
+DEFINE INIT_TDEF       = "T_USR" (CHAR)
+DEFINE INIT_TTMP       = "TEMP" (CHAR)
+DEFINE IBSO_OWNER      = "IBS" (CHAR)
+DEFINE U               = "IBS" (CHAR)
+DEFINE DT              = "T_USR" (CHAR)
+DEFINE TT              = "TEMP" (CHAR)
+
+Процедура PL/SQL успешно завершена.
+
+
+Checking tablespaces
+
+Процедура PL/SQL успешно завершена.
+
+
+Процедура PL/SQL успешно завершена.
+
+SQL> create user &u identified by &u;
+
+Пользователь создан.
+
+SQL> alter  user &u default tablespace &dt;
+
+Пользователь изменен.
+
+SQL> alter  user &u temporary tablespace &tt;
+
+Пользователь изменен.
+
+SQL> alter  user &u default role none;
+
+Пользователь изменен.
+
+SQL> 
+SQL> 
+SQL> 
+SQL> spool off
