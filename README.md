@@ -6,7 +6,10 @@ This package allows:
   - create new database as copy from backup
   - drop database
   - execute statements
-
+  - start/shutdown database
+  - start/stop container database
+  - get info(instance, db, container)
+  - import dump
 
 ## Getting Started
 

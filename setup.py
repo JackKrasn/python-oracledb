@@ -10,6 +10,7 @@ setup(
     author_email=oracledb.__author_email__,
     packages=find_packages(),
     long_description=open(join(dirname(__file__), 'README.rst')).read(),
+    include_package_data=True,
     install_requires=['os', 'logging', 'jinja2', 'StringIO','datetime', 'subprocess', 'thread', 'cx_Oracle',
                       'distutils', 'sys', 'shutil']
 )

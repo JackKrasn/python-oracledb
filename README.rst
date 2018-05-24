@@ -3,9 +3,11 @@ Description
 
 The package to manage the Oracle Databases.
 This package allows:
-  - create new database using dbca in silent mode
-  - create new database as copy using rman duplicate
+  - create new database from template
+  - create new database as copy
   - drop database
   - execute statements
-  - create db copy
-  - create
+  - start/shutdown database
+  - start/stop container database
+  - get info(instance, db, container)
+

@@ -1,0 +1,2 @@
+recursive-include oracledb/templates *.j2 *.dbt
+recursive-include oracledb/sql *.sql
