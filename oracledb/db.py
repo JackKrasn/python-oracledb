@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import distutils.dir_util
@@ -317,9 +317,9 @@ def decorator_startup(func):
 
 class LocalDb(Db):
     def __init__(self, sid):
+        orautils.oraenv(sid)
         super(LocalDb,self).__init__(tns=None)
         self.conn_string = '/'
-        orautils.oraenv(sid)
         self.sid = sid
         self.oraver = str(orautils.get_oh_version(self.oracle_home))
         #self.oraver='12102'
