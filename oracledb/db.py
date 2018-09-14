@@ -113,7 +113,7 @@ class MyCursor(cx_Oracle.Cursor):
                 sys.exit(1)
 
     def define_vars(self, kwargs):
-        return {key: self.var(getattr(cx_Oracle, value.upper())) for key,value in kwargs.iteritems()}
+        return {key: self.var(getattr(cx_Oracle, value.upper())) for key, value in kwargs.iteritems()}
 
 
 class MyConnection(cx_Oracle.Connection):
@@ -244,8 +244,8 @@ class Db(object):
     def pdb_close(self, con_name=''):
         """
         Остановить контейнерную БД
-        param con_name: Имя контейнера, который необходимо остановить. По умолчанию команда выполнится на текущем контейнере.
-        :return:
+        :param con_name: Имя контейнера, который необходимо остановить. По умолчанию команда выполнится на текущем
+        контейнере.
         """
         cur = self.cur()
         #ORA-65020: pluggable database already close. Ignore this error
@@ -256,7 +256,6 @@ class Db(object):
         """
         Перейти в указанный контейнер
         :param con_name: имя контейнера в который необходимо перейти
-        :return:
         """
         cur = self.cur()
         cur.ddl_execute('alter session set container={}'.format(con_name))
@@ -291,6 +290,7 @@ def just_warning_exception(ora_err):
         return wrapped_with_warning_inner
     return wrapped_with_warning
 
+
 def decorator_startup(func):
     """
     Декоратор. Обвертка для методов mount и open
@@ -319,6 +319,7 @@ def decorator_datapatch(*args, **kwargs):
     Пример:
     При создании БД из шаблона, используется метод create_from_tpl. В методе нужно указать несколько аргументов, поскольку их количество неизвестно,
     то передаю так *args, **kwargs.
+    :type kwargs: позиционные параметры оборачиваемого метода
     """
     def wrapper(method_to_decorate):
         def wrapped(self):
@@ -423,8 +424,8 @@ class LocalDb(Db):
         """
         Создание файла паролей(orapw).
         """
-        orapwfile = os.path.join(self.oracle_home,'dbs','orapw{}'.format(self.sid))
-        log_adapter.debug('create orapw file %s',orapwfile)
+        orapwfile = os.path.join(self.oracle_home, 'dbs', 'orapw{}'.format(self.sid))
+        log_adapter.debug('create orapw file %s', orapwfile)
         cmd='$ORACLE_HOME/bin/orapwd file={} password=sys force=yes'.format(orapwfile)
         log_adapter.debug('%s', cmd)
         sp.check_output(cmd, shell=True).rstrip()
@@ -438,7 +439,7 @@ class LocalDb(Db):
         :param parallel: количество каналов, которые будут открыты, т.е. параллельность
         :param until_time: на какое время восстановить БД. Формат времени dd.mm.yyyy hh24:mi:ss
         Значение параметра подставляется в команду rman set until time=(to_date(:param),'dd.mm.yyyy hh24:mi:ss').
-                """
+        """
         log_adapter.info('rman duplicate from backup %s', bkp_loc)
         rman_tpl='duplicate_from_bkp.rman.j2' #шаблон для скрипта
         rman_script=os.path.join('/tmp',rman_tpl.replace('.j2','')) #имя скрипта
@@ -474,9 +475,10 @@ class LocalDb(Db):
         self.cur().ddl_execute("create spfile from pfile='{}'".format(pfile),
                                32002)  # ORA-32002: cannot create SPFILE already being used by the instance
         log_adapter.debug('remove pfile %s', pfile)
-        #Добавление бд в oratab
+        # Добавление бд в oratab
         orautils.oratab_add(self.sid,self.oracle_home)
         os.remove(pfile) if os.path.exists(pfile) else None  # удаление pfile, т.к. был создан spfile
+
 
     @decorator_datapatch
     def create_from_tpl(self, newsid, oradata, nls='CL8ISO8859P5', cdb=False):
@@ -485,12 +487,13 @@ class LocalDb(Db):
         :param newsid: sid для создаваемой БД
         :param oradata: значение параметра db_create_file_dest. Т.е. расположение файлов БД
         :param nls: кодировка базы данных
+        :param cdb: создаваемая БД контейнерная иди нет. По умолчанию false => БД неконтейнерная.
         """
         self.sid = newsid
         os.environ['ORACLE_SID'] = newsid
-        dbca_rsp = 'dbca.' + self.oraver + '.rsp.j2'# шаблон response file для DBCA. Формат dbca.12102.rsp.j2
-        dbca_dbt = 'dbca.' + self.oraver + '.dbt.j2'# j2 шаблон для шаблона dbca в dbt
-        rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', ''))# response файл полученный из шаблона файла ответов
+        dbca_rsp = 'dbca.' + self.oraver + '.rsp.j2'  # шаблон response file для DBCA. Формат dbca.12102.rsp.j2
+        dbca_dbt = 'dbca.' + self.oraver + '.dbt.j2'  # j2 шаблон для шаблона dbca в dbt
+        rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', ''))  # response файл полученный из шаблона
         dbt_file = os.path.join('/tmp', dbca_dbt.replace('.j2', ''))
         self.init_param.update({'oradata': oradata,
                                 'sid': self.sid,
