@@ -45,7 +45,7 @@ def cleanout(*args):
             log_adapter.warning('Eror %s - %s', e.filename, e.strerror)
 
 
-#@dblogger.decorator_debug('create directories',log_adapter)
+# @dblogger.decorator_debug('create directories',log_adapter)
 def dirs_create(*args):
     message = 'create directories ' + '%s ' * len(args)
     log_adapter.debug(message, *args)
@@ -310,6 +310,23 @@ def decorator_startup(func):
     return wrapper
 
 
+def decorator_datapatch(*args, **kwargs):
+    """
+    Декоратор для запуска datapatch после создания БД.  Это обвертка над методом _create и create_from_tpl.
+    method_to_decorate - метод, над которым пишется обвертка.
+    *args - опциональные аргументы
+    **kwargs - позиционные аргументы
+    Пример:
+    При создании БД из шаблона, используется метод create_from_tpl. В методе нужно указать несколько аргументов, поскольку их количество неизвестно,
+    то передаю так *args, **kwargs.
+    """
+    def wrapper(method_to_decorate):
+        def wrapped(self):
+            method_to_decorate(self, *args, **kwargs)
+            cmd = os.path.join(self.oracle_home, 'OPatch', 'datapatch') + ' -verbose'
+            self._run_cmd(cmd)
+        return wrapped
+    return wrapper
 # class PlatformCft(Db):
 #     def __init__(self):
 
@@ -370,7 +387,7 @@ class LocalDb(Db):
         self.param = {}
         self.cur().close()
         self.conn.close()
-        self.conn=None
+        self.conn = None
 
     def shut_immediate(self):
         """
@@ -393,13 +410,12 @@ class LocalDb(Db):
             log_adapter.info('shutdown abort')
             self._shut(cx_Oracle.DBSHUTDOWN_ABORT)
 
-
     def pfile_create(self):
         """
         Создание файла параметров pfile из шаблона init.ora.j2
         :return: путь к pfile
         """
-        pfile = os.path.join(self.oracle_home, 'dbs','init{}.ora'.format(self.sid))
+        pfile = os.path.join(self.oracle_home, 'dbs', 'init{}.ora'.format(self.sid))
         orautils.gen_from_tpl(TPL_DIR, 'init.ora.j2', out_file=pfile, **self.init_param)
         return pfile
 
@@ -462,6 +478,7 @@ class LocalDb(Db):
         orautils.oratab_add(self.sid,self.oracle_home)
         os.remove(pfile) if os.path.exists(pfile) else None  # удаление pfile, т.к. был создан spfile
 
+    @decorator_datapatch
     def create_from_tpl(self, newsid, oradata, nls='CL8ISO8859P5', cdb=False):
         """
         Создание БД из шаблона с помощью DBCA
@@ -473,7 +490,7 @@ class LocalDb(Db):
         os.environ['ORACLE_SID'] = newsid
         dbca_rsp = 'dbca.' + self.oraver + '.rsp.j2'# шаблон response file для DBCA. Формат dbca.12102.rsp.j2
         dbca_dbt = 'dbca.' + self.oraver + '.dbt.j2'# j2 шаблон для шаблона dbca в dbt
-        rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', '')) # response файл полученный из шаблона файла ответов
+        rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', ''))# response файл полученный из шаблона файла ответов
         dbt_file = os.path.join('/tmp', dbca_dbt.replace('.j2', ''))
         self.init_param.update({'oradata': oradata,
                                 'sid': self.sid,
@@ -503,8 +520,9 @@ class LocalDb(Db):
         # Обхожу кортеж в цикле и выполняю каждую команду по отдельности
         #for sql in get_sql('create_tablespaces.sql'):
         #    self.cur().ddl_execute(sql)
-        #cleanout(rsp_file,dbt_file)
+        cleanout(rsp_file, dbt_file)
 
+    @decorator_datapatch()
     def _create(self, newsid, oradata, fn_run, fn_run_args=(), fn_pre=None, fn_pre_args=()):
         self.sid = newsid
         self.init_param.update({'oradata': oradata, 'sid': self.sid})
