@@ -1,4 +1,4 @@
-<DatabaseTemplate name="dbca.12201" description="" version="12.2.0.1.0">
+<DatabaseTemplate name="dbca.12201" description="" version="12.2.0.1">
    <CommonAttributes>
       <option name="OMS" value="false"/>
       <option name="JSERVER" value="true"/>
@@ -25,7 +25,7 @@
          <initParam name="db_name" value="{{ sid }}"/>
          <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE={{ sid }}XDB)"/>
          <initParam name="audit_file_dest" value="{{ oracle_base }}/admin/{{ sid }}/adump"/>
-         <initParam name="compatible" value="12.2.0.1.0"/>
+         <initParam name="compatible" value="{{ compatible }}"/>
          <initParam name="remote_login_passwordfile" value="EXCLUSIVE"/>
          <initParam name="db_create_online_log_dest_1" value="{{ oradata }}"/>
          <initParam name="job_queue_processes" value="50"/>

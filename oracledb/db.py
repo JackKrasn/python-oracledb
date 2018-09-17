@@ -322,7 +322,7 @@ def decorator_datapatch(*args, **kwargs):
     :type kwargs: позиционные параметры оборачиваемого метода
     """
     def wrapper(method_to_decorate):
-        def wrapped(self):
+        def wrapped(self, *args, **kwargs):
             method_to_decorate(self, *args, **kwargs)
             cmd = os.path.join(self.oracle_home, 'OPatch', 'datapatch') + ' -verbose'
             self._run_cmd(cmd)
@@ -339,12 +339,13 @@ class LocalDb(Db):
         super(LocalDb,self).__init__(tns=None)
         self.conn_string = '/'
         self.sid = sid
-        self.oraver = str(orautils.get_oh_version(self.oracle_home))
+        self.oraver, self.compatible = [str(x) for x in orautils.get_oh_version(self.oracle_home)]
         #self.oraver='12102'
-        self.oh_templates = os.path.join(self.oracle_home,'assistants','dbca','templates')
+        self.oh_templates = os.path.join(self.oracle_home, 'assistants', 'dbca', 'templates')
         self.init_param = {
             'local_listener': 'ORALIST' + self.oraver,
-            'sid': sid
+            'sid': sid,
+            'compatible': self.compatible
         }
         self.connection_init()
 
@@ -480,7 +481,7 @@ class LocalDb(Db):
         os.remove(pfile) if os.path.exists(pfile) else None  # удаление pfile, т.к. был создан spfile
 
 
-    @decorator_datapatch
+    @decorator_datapatch()
     def create_from_tpl(self, newsid, oradata, nls='CL8ISO8859P5', cdb=False):
         """
         Создание БД из шаблона с помощью DBCA
@@ -579,7 +580,7 @@ class LocalDb(Db):
         self.shut_abort()
         return bkpspfile
 
-    def delete(self,with_backups=False):
+    def delete(self, with_backups=False):
         """
         Удаление БД, используя утилиту dbca.
         Утилита dbca удаляет датафайлы, файл паролей, файл параметров, каталоги, регистрацию в oratab и листенере.
