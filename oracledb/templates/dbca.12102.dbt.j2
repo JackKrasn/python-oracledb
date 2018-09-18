@@ -26,22 +26,22 @@
    <CustomScripts Execute="false"/>
    <InitParamAttributes>
       <InitParams>
-         <initParam name="db_create_file_dest" value="{ORADATA}"/>
-	 <initParam name="db_create_online_log_dest_1" value="{ORADATA}"/>
+         <initParam name="db_create_file_dest" value="{{ oradata }}"/>
+	 <initParam name="db_create_online_log_dest_1" value="{{ oradata }}"/>
          <initParam name="db_recovery_file_dest" value="/dbfra"/>
          <initParam name="db_recovery_file_dest_size" value="100" unit="GB"/>
 	 <initParam name="db_domain" value=""/>
-         <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE={SID}XDB)"/>
-         <initParam name="audit_file_dest" value="{ORACLE_BASE}/admin/{DB_UNIQUE_NAME}/adump"/>
-         <initParam name="compatible" value="12.1.0.2.0"/>
+         <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE={{ sid }}XDB)"/>
+         <initParam name="audit_file_dest" value="{{ oracle_base }}/admin/{{ sid }}/adump"/>
+         <initParam name="compatible" value="{{ compatible }}"/>
          <initParam name="remote_login_passwordfile" value="EXCLUSIVE"/>
          <initParam name="sga_target" value="2" unit="GB"/>
          <initParam name="pga_aggregate_target" value="1" unit="GB"/>
 	 <initParam name="shared_pool_size" value="1" unit="GB"/>
          <initParam name="processes" value="500"/>
-         <initParam name="local_listener" value="{ORALIST}"/>
+         <initParam name="local_listener" value="{{ local_listener }}"/>
          <initParam name="undo_tablespace" value="UNDOTBS1"/>
-         <initParam name="diagnostic_dest" value="{ORACLE_BASE}/admin/{DB_UNIQUE_NAME}"/>
+         <initParam name="diagnostic_dest" value="{{ oracle_base }}/admin/{{ sid }}"/>
          <initParam name="audit_trail" value="db"/>
          <initParam name="db_block_size" value="8" unit="KB"/>
          <initParam name="open_cursors" value="300"/>
@@ -56,9 +56,9 @@
          <customSGA>true</customSGA>
          <nationalCharacterSet>AL16UTF16</nationalCharacterSet>
          <archiveLogMode>false</archiveLogMode>
-         <initParamFileName>{ORACLE_BASE}/admin/{DB_UNIQUE_NAME}/pfile/init.ora</initParamFileName>
+         <initParamFileName>{{ oracle_base }}/admin/{{ sid }}/pfile/init.ora</initParamFileName>
       </MiscParams>
-      <SPfile useSPFile="true">{ORACLE_HOME}/dbs/spfile{SID}.ora</SPfile>
+      <SPfile useSPFile="true">{{ oracle_home }}/dbs/spfile{{ sid }}.ora</SPfile>
    </InitParamAttributes>
    <StorageAttributes>
       <ControlfileAttributes id="Controlfile">
@@ -67,10 +67,10 @@
 	 <maxLogMembers>3</maxLogMembers>
 	 <maxLogHistory>1</maxLogHistory>
 	 <maxInstances>8</maxInstances>
-	 <image name="control01.ctl" filepath="{ORADATA}/control01.ctl"/>
-         <image name="control02.ctl" filepath="{ORADATA}/control02.ctl"/>
+	 <image name="control01.ctl" filepath="{{ oradata }}/control01.ctl"/>
+         <image name="control02.ctl" filepath="{{ oradata }}/control02.ctl"/>
       </ControlfileAttributes>
-      <DatafileAttributes id="{ORADATA}/system01.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/system01.dbf" con_id="1">
          <tablespace>SYSTEM</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -81,7 +81,7 @@
          <increment unit="MB">128</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/system02.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/system02.dbf" con_id="1">
          <tablespace>SYSTEM</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -92,7 +92,7 @@
          <increment unit="MB">128</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/system03.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/system03.dbf" con_id="1">
          <tablespace>SYSTEM</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -103,7 +103,7 @@
          <increment unit="MB">128</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/system04.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/system04.dbf" con_id="1">
          <tablespace>SYSTEM</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -114,7 +114,7 @@
          <increment unit="MB">128</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/sysaux01.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/sysaux01.dbf" con_id="1">
          <tablespace>SYSAUX</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -125,7 +125,7 @@
          <increment unit="MB">32</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/sysaux02.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/sysaux02.dbf" con_id="1">
          <tablespace>SYSAUX</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -136,7 +136,7 @@
          <increment unit="MB">32</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/temp01.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/temp01.dbf" con_id="1">
          <tablespace>TEMP</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -147,7 +147,7 @@
          <increment unit="MB">10</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
-      <DatafileAttributes id="{ORADATA}/undo01.dbf" con_id="1">
+      <DatafileAttributes id="{{ oradata }}/undo01.dbf" con_id="1">
          <tablespace>UNDOTBS1</tablespace>
          <temporary>false</temporary>
          <online>true</online>
@@ -178,8 +178,8 @@
          <autoSegmentMgmt>true</autoSegmentMgmt>
          <bigfile>false</bigfile>
          <datafilesList>
-            <TablespaceDatafileAttributes id="{ORADATA}/sysaux01.dbf"/>
-            <TablespaceDatafileAttributes id="{ORADATA}/sysaux02.dbf"/>
+            <TablespaceDatafileAttributes id="{{ oradata }}/sysaux01.dbf"/>
+            <TablespaceDatafileAttributes id="{{ oradata }}/sysaux02.dbf"/>
            </datafilesList>
       </TablespaceAttributes>
       <TablespaceAttributes id="SYSTEM" con_id="1">
@@ -202,10 +202,10 @@
          <autoSegmentMgmt>true</autoSegmentMgmt>
          <bigfile>false</bigfile>
          <datafilesList>
-            <TablespaceDatafileAttributes id="{ORADATA}/system01.dbf"/>
-	    <TablespaceDatafileAttributes id="{ORADATA}/system02.dbf"/>
-	    <TablespaceDatafileAttributes id="{ORADATA}/system03.dbf"/>
-	    <TablespaceDatafileAttributes id="{ORADATA}/system04.dbf"/>
+          <TablespaceDatafileAttributes id="{{ oradata }}/system01.dbf"/>
+	      <TablespaceDatafileAttributes id="{{ oradata }}/system02.dbf"/>
+	      <TablespaceDatafileAttributes id="{{ oradata }}/system03.dbf"/>
+	      <TablespaceDatafileAttributes id="{{ oradata }}/system04.dbf"/>
          </datafilesList>
       </TablespaceAttributes>
       <TablespaceAttributes id="TEMP" con_id="1">
@@ -228,7 +228,7 @@
          <autoSegmentMgmt>true</autoSegmentMgmt>
          <bigfile>false</bigfile>
          <datafilesList>
-            <TablespaceDatafileAttributes id="{ORADATA}/temp01.dbf"/>
+            <TablespaceDatafileAttributes id="{{ oradata }}/temp01.dbf"/>
          </datafilesList>
       </TablespaceAttributes>
       <TablespaceAttributes id="UNDOTBS1" con_id="1">
@@ -251,38 +251,38 @@
          <autoSegmentMgmt>true</autoSegmentMgmt>
          <bigfile>false</bigfile>
          <datafilesList>
-            <TablespaceDatafileAttributes id="{ORADATA}/undo01.dbf"/>
+            <TablespaceDatafileAttributes id="{{ oradata }}/undo01.dbf"/>
          </datafilesList>
       </TablespaceAttributes>
       <RedoLogGroupAttributes id="1">
          <reuse>false</reuse>
          <fileSize unit="KB">153600</fileSize>
          <Thread>1</Thread>
-         <member ordinal="0" memberName="redo01.log" filepath="{ORADATA}/"/>
+         <member ordinal="0" memberName="redo01.log" filepath="{{ oradata }}/"/>
       </RedoLogGroupAttributes>
       <RedoLogGroupAttributes id="2">
          <reuse>false</reuse>
          <fileSize unit="KB">153600</fileSize>
          <Thread>1</Thread>
-         <member ordinal="0" memberName="redo02.log" filepath="{ORADATA}/"/>
+         <member ordinal="0" memberName="redo02.log" filepath="{{ oradata }}/"/>
       </RedoLogGroupAttributes>
       <RedoLogGroupAttributes id="3">
          <reuse>false</reuse>
          <fileSize unit="KB">153600</fileSize>
          <Thread>1</Thread>
-         <member ordinal="0" memberName="redo03.log" filepath="{ORADATA}/"/>
+         <member ordinal="0" memberName="redo03.log" filepath="{{ oradata }}/"/>
       </RedoLogGroupAttributes>
       <RedoLogGroupAttributes id="4">
          <reuse>false</reuse>
          <fileSize unit="KB">153600</fileSize>
          <Thread>1</Thread>
-         <member ordinal="0" memberName="redo04.log" filepath="{ORADATA}/"/>
+         <member ordinal="0" memberName="redo04.log" filepath="{{ oradata }}/"/>
       </RedoLogGroupAttributes>
       <RedoLogGroupAttributes id="5">
          <reuse>false</reuse>
          <fileSize unit="KB">153600</fileSize>
          <Thread>1</Thread>
-         <member ordinal="0" memberName="redo05.log" filepath="{ORADATA}/"/>
+         <member ordinal="0" memberName="redo05.log" filepath="{{ oradata }}/"/>
       </RedoLogGroupAttributes>
    </StorageAttributes>
 </DatabaseTemplate>

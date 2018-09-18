@@ -1,10 +1,10 @@
-<DatabaseTemplate name="dbca.12201" description="" version="12.2.0.1.0">
+<DatabaseTemplate name="dbca.12201" description="" version="12.2.0.1">
    <CommonAttributes>
       <option name="OMS" value="false"/>
       <option name="JSERVER" value="true"/>
       <option name="SPATIAL" value="false"/>
       <option name="IMEDIA" value="false"/>
-      <option name="ORACLE_TEXT" value="false">
+      <option name="ORACLE_TEXT" value="true">
          <tablespace id="SYSAUX"/>
       </option>
       <option name="SAMPLE_SCHEMA" value="false"/>
@@ -25,7 +25,7 @@
          <initParam name="db_name" value="{{ sid }}"/>
          <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE={{ sid }}XDB)"/>
          <initParam name="audit_file_dest" value="{{ oracle_base }}/admin/{{ sid }}/adump"/>
-         <initParam name="compatible" value="12.2.0.1.0"/>
+         <initParam name="compatible" value="{{ compatible }}"/>
          <initParam name="remote_login_passwordfile" value="EXCLUSIVE"/>
          <initParam name="db_create_online_log_dest_1" value="{{ oradata }}"/>
          <initParam name="job_queue_processes" value="50"/>
@@ -50,11 +50,11 @@
          <databaseType>MULTIPURPOSE</databaseType>
          <maxUserConn>20</maxUserConn>
          <percentageMemTOSGA>40</percentageMemTOSGA>
-         <customSGA>false</customSGA>
+         <customSGA>true</customSGA>
          <archiveLogMode>false</archiveLogMode>
          <initParamFileName>{{ oracle_base }}/admin/{{ sid }}/pfile/init.ora</initParamFileName>
       </MiscParams>
-      <SPfile useSPFile="true">{{ oracle_home }}/dbs/spfile{SID}.ora</SPfile>
+      <SPfile useSPFile="true">{{ oracle_home }}/dbs/spfile{{ sid }}.ora</SPfile>
    </InitParamAttributes>
    <StorageAttributes>
       <ControlfileAttributes id="Controlfile">
@@ -65,17 +65,6 @@
          <maxInstances>8</maxInstances>
          <image name="control01.ctl" filepath="{{ oradata }}/"/>
       </ControlfileAttributes>
-      <DatafileAttributes id="{{ oradata }}/sysaux01.dbf" con_id="1">
-         <tablespace>SYSAUX</tablespace>
-         <temporary>false</temporary>
-         <online>true</online>
-         <status>0</status>
-         <size unit="MB">250</size>
-         <reuse>false</reuse>
-         <autoExtend>true</autoExtend>
-         <increment unit="MB">32</increment>
-         <maxSize unit="MB">-1</maxSize>
-      </DatafileAttributes>
       <DatafileAttributes id="{{ oradata }}/system01.dbf" con_id="1">
          <tablespace>SYSTEM</tablespace>
          <temporary>false</temporary>
@@ -118,6 +107,28 @@
          <reuse>false</reuse>
          <autoExtend>true</autoExtend>
          <increment unit="MB">128</increment>
+         <maxSize unit="MB">-1</maxSize>
+      </DatafileAttributes>
+      <DatafileAttributes id="{{ oradata }}/sysaux01.dbf" con_id="1">
+         <tablespace>SYSAUX</tablespace>
+         <temporary>false</temporary>
+         <online>true</online>
+         <status>0</status>
+         <size unit="MB">250</size>
+         <reuse>false</reuse>
+         <autoExtend>true</autoExtend>
+         <increment unit="MB">32</increment>
+         <maxSize unit="MB">-1</maxSize>
+      </DatafileAttributes>
+      <DatafileAttributes id="{{ oradata }}/sysaux02.dbf" con_id="1">
+         <tablespace>SYSAUX</tablespace>
+         <temporary>false</temporary>
+         <online>true</online>
+         <status>0</status>
+         <size unit="MB">250</size>
+         <reuse>false</reuse>
+         <autoExtend>true</autoExtend>
+         <increment unit="MB">32</increment>
          <maxSize unit="MB">-1</maxSize>
       </DatafileAttributes>
       <DatafileAttributes id="{{ oradata }}/temp01.dbf" con_id="1">
@@ -163,6 +174,7 @@
          <bigfile>false</bigfile>
          <datafilesList>
             <TablespaceDatafileAttributes id="{{ oradata }}/sysaux01.dbf"/>
+            <TablespaceDatafileAttributes id="{{ oradata }}/sysaux02.dbf"/>
          </datafilesList>
       </TablespaceAttributes>
       <TablespaceAttributes id="SYSTEM" con_id="1">

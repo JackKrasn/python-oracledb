@@ -73,7 +73,8 @@ def get_oh_version(oracle_home):
     """
     Определяет версию ORACLE_HOME
     :param oracle_home: path ORACLE_HOME
-    :return: oraver: Версия oracle_home  в формате 12102. Удалены точки и ограничен вывод до 5 знаков
+    :return: oraver, compatible: Возвращает список из двух знычений, oracle_home в формате 12102.
+    И  по сути таже версия Oracle, только с точками, формат 12.1.0.2. Нужно для параметра compatible
     """
     # Использовать strings более правильно, однако слишком долго выполняется.
     # Использую запрос к opatch. Важно, чтобы до этого не выполнялся oraenv, иначе вернет список патчей от хоума
@@ -85,7 +86,7 @@ def get_oh_version(oracle_home):
     log_adapter.debug('%s', cmd)
     oraver = sp.check_output(cmd, shell=True)
     log_adapter.debug('oracle home version=%s', oraver)
-    return oraver.replace(".","")
+    return oraver.replace(".", ""), oraver
 
 
 def oratab_add(sid, oracle_home):

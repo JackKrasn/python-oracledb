@@ -212,7 +212,7 @@ DATABASECONFTYPE  = "SI"
 # Default value : false
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-#CREATEASCONTAINERDATABASE =
+CREATEASCONTAINERDATABASE ={{ cdb }}
 
 #-----------------------------------------------------------------------------
 # Name          : NUMBEROFPDBS
@@ -263,7 +263,7 @@ DATABASECONFTYPE  = "SI"
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
 #TEMPLATENAME = "General_Purpose.dbc"
-TEMPLATENAME = 12102.dbt
+TEMPLATENAME = {{ template }}
 
 #-----------------------------------------------------------------------------
 # Name          : OBFUSCATEDPASSWORDS
@@ -602,7 +602,7 @@ NATIONALCHARACTERSET= "AL16UTF16"
 # Mandatory     : NO
 #-----------------------------------------------------------------------------
 #VARIABLES = 
-VARIABLES = ORADATA={{ oradata }}, ORALIST={{ local_listener }}
+#VARIABLES = ORADATA={{ oradata }}, ORALIST={{ local_listener }}
 
 #-----------------------------------------------------------------------------
 # Name          : INITPARAMS
