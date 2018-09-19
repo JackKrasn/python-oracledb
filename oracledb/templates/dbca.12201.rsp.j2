@@ -159,7 +159,7 @@ pqCardinality=
 # Default value : false
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-createAsContainerDatabase={{ cdb }}
+createAsContainerDatabase={{ cdb|lower }}
 
 #-----------------------------------------------------------------------------
 # Name          : numberOfPDBs
@@ -189,7 +189,7 @@ pdbName=
 # Default value : TRUE
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-useLocalUndoForPDBs={{ cdb }}
+useLocalUndoForPDBs={{ cdb|lower }}
 
 #-----------------------------------------------------------------------------
 # Name          : pdbAdminPassword
@@ -408,7 +408,7 @@ datafileJarLocation=
 # Default value : $ORACLE_BASE/oradata
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-# datafileDestination={{ oradata }}
+datafileDestination={{ oradata }}
 
 #-----------------------------------------------------------------------------
 # Name          : recoveryAreaDestination
