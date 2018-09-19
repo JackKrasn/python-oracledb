@@ -263,7 +263,7 @@ CREATEASCONTAINERDATABASE ={{ cdb }}
 # Mandatory     : Yes
 #-----------------------------------------------------------------------------
 #TEMPLATENAME = "General_Purpose.dbc"
-TEMPLATENAME = {{ template }}
+TEMPLATENAME = "{{ template }}"
 
 #-----------------------------------------------------------------------------
 # Name          : OBFUSCATEDPASSWORDS
@@ -465,7 +465,7 @@ DBSNMPPASSWORD = "dbsnmp"
 # Default value : $ORACLE_BASE/oradata
 # Mandatory     : No
 #-----------------------------------------------------------------------------
-#DATAFILEDESTINATION = /db1/oradata/orcl12c
+DATAFILEDESTINATION = {{ oradata }}
 
 #-----------------------------------------------------------------------------
 # Name          : RECOVERYAREADESTINATION

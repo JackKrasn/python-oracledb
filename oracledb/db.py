@@ -522,8 +522,13 @@ class LocalDb(Db):
         # Не удается за раз выполнить запрос по созданию ТБП. Выскакивает ошибка переполнения буфера
         # Поскольку get_sql возвращает кортеж комманд разделенных по ";"
         # Обхожу кортеж в цикле и выполняю каждую команду по отдельности
-        #for sql in get_sql('create_tablespaces.sql'):
+        # for sql in get_sql('create_tablespaces.sql'):
         #    self.cur().ddl_execute(sql)
+        # hotfix 0.1.3
+        # в 12.2.0.1 не создаются файлы в шаблоне dbt. Ковырялся не смог понять почему, поэтому добавляю
+        # файлы уже после создания БД.
+        for sql in get_sql('add_datafiles.sql'):
+            self.cur().ddl_execute(sql)
         cleanout(rsp_file, dbt_file)
 
     @decorator_datapatch()

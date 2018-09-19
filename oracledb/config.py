@@ -6,15 +6,8 @@ import re
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 SQL_DIR = os.path.join(BASE_DIR, 'sql')
-SQL_SYSTEM = os.path.join(SQL_DIR, 'SYSTEM')
-SQL_UTILS = os.path.join(SQL_SYSTEM, 'UTILS')
 TPL_DIR = os.path.join(BASE_DIR, 'templates')
 
-# from orautils
-#INSTANT_CLIENT = os.path.join(BASE_DIR, 'instantclient_12_2')
-#TNS_ADMIN = os.path.join(BASE_DIR, 'tns')
-#WALLET_PATH = os.path.join(BASE_DIR, 'wallet')
-# Если os Windows, то задать путь до инстанс клиента
 if platform.system() == 'Windows':
 #    os.environ['PATH'] = INSTANT_CLIENT + os.pathsep + os.environ['PATH']
     os.environ['NLS_LANG'] = 'RUSSIAN_CIS.CL8MSWIN1251'
@@ -23,8 +16,6 @@ if platform.system() == 'Windows':
 else:
     os.environ['TMP'] = '/tmp'
     ORA_ADMIN = '/u/app/oracle/admin'
-
-#os.environ['TNS_ADMIN'] = TNS_ADMIN
 
 if os.path.exists('/usr/local/bin/dbhome'):
     with open('/usr/local/bin/dbhome') as dbhome:
