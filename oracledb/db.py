@@ -516,7 +516,7 @@ class LocalDb(Db):
                                 'nls_characterset': nls,
                                 'oracle_base': self.oracle_base,
                                 'oracle_home': self.oracle_home,
-                                'template': dbc_file,
+                                'template': dbca_dbc.replace('.j2', ''),
                                 'shared_pool_size': '1G',
                                 'archive_mode': archive_mode,
                                 'cdb': cdb})
@@ -526,7 +526,7 @@ class LocalDb(Db):
         orautils.gen_from_tpl(TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
         orautils.gen_from_tpl(TPL_DIR, dbca_dbc, out_file=dbc_file, **self.init_param)
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
-        shutil.copy2(dbc_file, self.oh_templates)
+        shutil.move(dbc_file, self.oh_templates)
         dirs_create(oradata)
         self._run_cmd(dbca_cmd)
         self.connection()
