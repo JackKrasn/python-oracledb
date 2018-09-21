@@ -93,7 +93,7 @@ class ConsoleShutUp(logging.Filter):
 
 logging.setLoggerClass(DBLogger)
 root_logger = logging.getLogger('oracledb')
-root_logger.setLevel(logging.DEBUG)
+root_logger.setLevel(logging.DEBUG)  # уровень логирования
 console = logging.StreamHandler()
 rotating_file = logging.handlers.RotatingFileHandler(LOG_PATH, backupCount=5)
 fmt = "%(asctime)s [%(name)s/%(methodName)s]: %(levelname)s: sid=%(sid)s: %(message)s"

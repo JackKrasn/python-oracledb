@@ -251,8 +251,7 @@ class Db(object):
         #ORA-65020: pluggable database already close. Ignore this error
         cur.ddl_execute('alter pluggable database {} close immediate'.format(con_name), oerr=65020)
 
-
-    def set_con(self,con_name='CDB$ROOT'):
+    def set_con(self, con_name='CDB$ROOT'):
         """
         Перейти в указанный контейнер
         :param con_name: имя контейнера в который необходимо перейти
@@ -273,6 +272,21 @@ class Db(object):
     def pdb_drop(self, con_name):
         cur = self.cur()
         cur.ddl_execute('drop pluggable database {} including datafiles'.format(con_name))
+
+    def copy_pdb(self, src_con_name, dst_con_name, snap=False):
+        """
+        :param src_con_name:  название контейнера с которого необходимо сделать копию
+        :param dst_con_name:  контейнер, который создается, т.е. новый
+        :param snap: создается снапшот или нет
+        """
+        if snap:
+            snap = 'snapshot copy'
+        else:
+            snap = ''
+
+        cur = self.cur()
+        cur.ddl_execute('create pluggable database {} from {} {}'.format(dst_con_name, src_con_name, snap))
+
 
 def just_warning_exception(ora_err):
     def wrapped_with_warning(fn):
