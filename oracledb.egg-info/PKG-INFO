@@ -1,0 +1,24 @@
+Metadata-Version: 1.1
+Name: oracledb
+Version: 0.1.4
+Summary: UNKNOWN
+Home-page: UNKNOWN
+Author: Evgeniy Krasnukhin
+Author-email: e.krasnukhin@cft.ru
+License: UNKNOWN
+Description: Description
+        ===================
+        The package to manage the Oracle Databases.
+        This package allows:
+        
+          - create new database from template
+          - create new database as copy
+          - drop database
+          - execute statements
+          - start/shutdown database
+          - start/stop container database
+          - get info(instance, db, container)
+          - import dump
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2.7
