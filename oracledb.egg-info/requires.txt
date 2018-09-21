@@ -1,0 +1,2 @@
+jinja2
+cx_Oracle
