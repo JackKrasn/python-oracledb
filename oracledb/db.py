@@ -526,7 +526,7 @@ class LocalDb(Db):
         orautils.gen_from_tpl(TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
         orautils.gen_from_tpl(TPL_DIR, dbca_dbc, out_file=dbc_file, **self.init_param)
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
-        shutil.move(dbc_file, self.oh_templates)
+        shutil.copy2(dbc_file, self.oh_templates)
         dirs_create(oradata)
         self._run_cmd(dbca_cmd)
         self.connection()
