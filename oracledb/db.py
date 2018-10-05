@@ -9,6 +9,7 @@ import cx_Oracle
 import dbexceptions
 import dblogger
 import orautils
+import glob
 import sys
 from config import *
 
@@ -50,6 +51,14 @@ def dirs_create(*args):
     message = 'create directories ' + '%s ' * len(args)
     log_adapter.debug(message, *args)
     map(lambda x: distutils.dir_util.mkpath(x), args)
+
+
+def files_exists(filepath):
+    for filepath_object in glob.glob(filepath):
+        if os.path.isfile(filepath_object):
+            return True
+
+    return False
 
 
 class MyCursor(cx_Oracle.Cursor):
@@ -148,13 +157,14 @@ class Listener(object):
 
 
 class Db(object):
-    def __init__(self, tns, wallet=True, user='sys', passw='sys'):
+    def __init__(self, tns, wallet=False, user='sys', passw='sys'):
         self.tns = tns
         self.param = {}
         self.info_db = {}
         self.info_con = {}
         self.info_instance = {}
         self.info_cft = {}
+        self.info_comp = {}
         #self.sys_pass = "sys"
         self.conn = None
         if wallet:
@@ -184,8 +194,11 @@ class Db(object):
         cur = self.cur()
         if self.info_instance['STATUS'] != 'STARTED': #get information from v$database. Database must be in mount mode
             self.info_db = cur.bind_cursor_query(slurp('info_db.sql')).out_list()[0]
+            self.info_comp = cur.bind_cursor_query(slurp('info_comp.sql')).out_list()[0]
             self.info_con = cur.binds_query(slurp('info_con.sql'), {'CON_NAME': 'STRING', 'CON_ID': 'NUMBER', 'CON_TYPE': 'STRING'})
             self.info_db.update(self.info_con)
+
+
 
     def connection(self):
         if self.conn  is None:
@@ -507,16 +520,29 @@ class LocalDb(Db):
         """
         self.sid = newsid
         os.environ['ORACLE_SID'] = newsid
-        dbca_rsp = 'dbca.' + self.oraver + '.rsp.j2'  # шаблон response file для DBCA. Формат dbca.12102.rsp.j2
-        dbca_dbc= 'General_Purpose.dbc.j2'  # j2 шаблон для шаблона dbca в dbc
+        dbca_rsp = 'dbca_' + self.oraver + '.rsp.j2'  # шаблон response file для DBCA. Формат dbca.12102.rsp.j2
+        #dbca_tpl= 'General_Purpose.{}.dbc.j2'.format(self.oraver)  # j2 шаблон для шаблона dbca в dbc
+        if cdb:
+            dfb_file = 'db_{}_cdb_{}.dfb'.format(self.oraver, nls)
+        else:
+            dfb_file = 'db_{}_noncdb_{}.dfb'.format(self.oraver, nls)
+
+        if files_exists(os.path.join(self.oh_templates, dfb_file) + '*'):  # Если шаблон существует по стандартному пути
+            dbca_tpl = dfb_file.replace('_{}.dfb'.format(nls), '.dbc.j2')
+            dfb_exists = True
+        else:
+            dbca_tpl = 'db_{}.dbt.j2'.format(self.oraver)
+            dfb_exists = False
+
+        # dbca_tpl = 'dbca.{}.dbt.j2'.format(self.oraver)
         rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', ''))  # response файл полученный из шаблона
-        dbc_file = os.path.join('/tmp', dbca_dbc.replace('.j2', ''))
+        tpl_file = os.path.join('/tmp', dbca_tpl.replace('.j2', ''))
         self.init_param.update({'oradata': oradata,
                                 'sid': self.sid,
                                 'nls_characterset': nls,
                                 'oracle_base': self.oracle_base,
                                 'oracle_home': self.oracle_home,
-                                'template': dbca_dbc.replace('.j2', ''),
+                                'template':  tpl_file,  # dbca_tpl.replace('.j2', ''),
                                 'shared_pool_size': '1G',
                                 'archive_mode': archive_mode,
                                 'cdb': cdb})
@@ -524,9 +550,9 @@ class LocalDb(Db):
         dbca_cmd = os.path.join(self.oracle_home, 'bin', 'dbca') + ' -createDatabase -silent -responseFile ' + rsp_file
         # создание response файла из шаблона
         orautils.gen_from_tpl(TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
-        orautils.gen_from_tpl(TPL_DIR, dbca_dbc, out_file=dbc_file, **self.init_param)
+        orautils.gen_from_tpl(TPL_DIR, dbca_tpl, out_file=tpl_file, **self.init_param)
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
-        shutil.copy2(dbc_file, self.oh_templates)
+        # shutil.copy2(tpl_file, self.oh_templates)
         dirs_create(oradata)
         self._run_cmd(dbca_cmd)
         self.connection()
@@ -543,9 +569,10 @@ class LocalDb(Db):
         # hotfix 0.1.3
         # в 12.2.0.1 не создаются файлы в шаблоне dbt. Ковырялся не смог понять почему, поэтому добавляю
         # файлы уже после создания БД.
-        for sql in get_sql('add_datafiles.sql'):
-            self.cur().ddl_execute(sql)
-        cleanout(rsp_file, dbc_file)
+        if not dfb_exists:
+            for sql in get_sql('add_datafiles.sql'):
+                self.cur().ddl_execute(sql)
+        # cleanout(rsp_file, tpl_file)
 
     @decorator_datapatch()
     def _create(self, newsid, oradata, fn_run, fn_run_args=(), fn_pre=None, fn_pre_args=()):
