@@ -360,7 +360,6 @@ def decorator_datapatch(*args, **kwargs):
 #     def __init__(self):
 
 
-
 class LocalDb(Db):
     def __init__(self, sid):
         orautils.oraenv(sid)
@@ -368,7 +367,7 @@ class LocalDb(Db):
         self.conn_string = '/'
         self.sid = sid
         self.oraver, self.compatible = [str(x) for x in orautils.get_oh_version(self.oracle_home)]
-        #self.oraver='12102'
+        # self.oraver='12102'
         self.oh_templates = os.path.join(self.oracle_home, 'assistants', 'dbca', 'templates')
         self.init_param = {
             'local_listener': 'ORALIST' + self.oraver,
