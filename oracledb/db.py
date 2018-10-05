@@ -194,11 +194,12 @@ class Db(object):
         cur = self.cur()
         if self.info_instance['STATUS'] != 'STARTED': #get information from v$database. Database must be in mount mode
             self.info_db = cur.bind_cursor_query(slurp('info_db.sql')).out_list()[0]
-            self.info_comp = cur.bind_cursor_query(slurp('info_comp.sql')).out_list()[0]
-            self.info_con = cur.binds_query(slurp('info_con.sql'), {'CON_NAME': 'STRING', 'CON_ID': 'NUMBER', 'CON_TYPE': 'STRING'})
+            # Получить список компонент, которые установлены. ВНачале получаем список словарей.Структура вида
+            # [{},{}], а затем преобразую в словарь {COMP_ID:STATUS}
+            self.info_comp = {id['COMP_ID']: id['STATUS'] for id in cur.bind_cursor_query(slurp('info_comp.sql')).out_list()}
+            self.info_con = cur.binds_query(slurp('info_con.sql'), {'CON_NAME': 'STRING', 'CON_ID': 'NUMBER',
+                                                                    'CON_TYPE': 'STRING'})
             self.info_db.update(self.info_con)
-
-
 
     def connection(self):
         if self.conn  is None:
@@ -359,7 +360,6 @@ def decorator_datapatch(*args, **kwargs):
 #     def __init__(self):
 
 
-
 class LocalDb(Db):
     def __init__(self, sid):
         orautils.oraenv(sid)
@@ -367,7 +367,7 @@ class LocalDb(Db):
         self.conn_string = '/'
         self.sid = sid
         self.oraver, self.compatible = [str(x) for x in orautils.get_oh_version(self.oracle_home)]
-        #self.oraver='12102'
+        # self.oraver='12102'
         self.oh_templates = os.path.join(self.oracle_home, 'assistants', 'dbca', 'templates')
         self.init_param = {
             'local_listener': 'ORALIST' + self.oraver,
