@@ -9,6 +9,7 @@ import cx_Oracle
 import dbexceptions
 import dblogger
 import orautils
+import glob
 import sys
 from config import *
 
@@ -50,6 +51,14 @@ def dirs_create(*args):
     message = 'create directories ' + '%s ' * len(args)
     log_adapter.debug(message, *args)
     map(lambda x: distutils.dir_util.mkpath(x), args)
+
+
+def files_exists(filepath):
+    for filepath_object in glob.glob(filepath):
+        if os.path.isfile(filepath_object):
+            return True
+
+    return False
 
 
 class MyCursor(cx_Oracle.Cursor):
@@ -148,13 +157,14 @@ class Listener(object):
 
 
 class Db(object):
-    def __init__(self, tns, wallet=True, user='sys', passw='sys'):
+    def __init__(self, tns, wallet=False, user='sys', passw='sys'):
         self.tns = tns
         self.param = {}
         self.info_db = {}
         self.info_con = {}
         self.info_instance = {}
         self.info_cft = {}
+        self.info_comp = {}
         #self.sys_pass = "sys"
         self.conn = None
         if wallet:
@@ -184,8 +194,11 @@ class Db(object):
         cur = self.cur()
         if self.info_instance['STATUS'] != 'STARTED': #get information from v$database. Database must be in mount mode
             self.info_db = cur.bind_cursor_query(slurp('info_db.sql')).out_list()[0]
+            self.info_comp = cur.bind_cursor_query(slurp('info_comp.sql')).out_list()[0]
             self.info_con = cur.binds_query(slurp('info_con.sql'), {'CON_NAME': 'STRING', 'CON_ID': 'NUMBER', 'CON_TYPE': 'STRING'})
             self.info_db.update(self.info_con)
+
+
 
     def connection(self):
         if self.conn  is None:
@@ -251,8 +264,7 @@ class Db(object):
         #ORA-65020: pluggable database already close. Ignore this error
         cur.ddl_execute('alter pluggable database {} close immediate'.format(con_name), oerr=65020)
 
-
-    def set_con(self,con_name='CDB$ROOT'):
+    def set_con(self, con_name='CDB$ROOT'):
         """
         Перейти в указанный контейнер
         :param con_name: имя контейнера в который необходимо перейти
@@ -264,8 +276,8 @@ class Db(object):
     def pdb_open(self, con_name='', mode='READ WRITE'):
         """
         Открыть контейнерную БД. По умолчанию открывается текущая БД в режиме READ WRITE
+        :param con_name: имя контейнера
         :param mode: допустимые значения READ WRITE, READ ONLY. В каком режиме открыть БД.
-        :return:
         """
         cur = self.cur()
         cur.ddl_execute('alter pluggable database {} open {}'.format(con_name, mode))
@@ -273,6 +285,21 @@ class Db(object):
     def pdb_drop(self, con_name):
         cur = self.cur()
         cur.ddl_execute('drop pluggable database {} including datafiles'.format(con_name))
+
+    def copy_pdb(self, src_con_name, dst_con_name, snap=False):
+        """
+        :param src_con_name:  название контейнера с которого необходимо сделать копию
+        :param dst_con_name:  контейнер, который создается, т.е. новый
+        :param snap: создается снапшот или нет
+        """
+        if snap:
+            snap = 'snapshot copy'
+        else:
+            snap = ''
+
+        cur = self.cur()
+        cur.ddl_execute('create pluggable database {} from {} {}'.format(dst_con_name, src_con_name, snap))
+
 
 def just_warning_exception(ora_err):
     def wrapped_with_warning(fn):
@@ -482,35 +509,50 @@ class LocalDb(Db):
 
 
     @decorator_datapatch()
-    def create_from_tpl(self, newsid, oradata, nls='CL8ISO8859P5', cdb=False):
+    def create_from_tpl(self, newsid, oradata, nls='CL8ISO8859P5', archive_mode=False, cdb=False):
         """
         Создание БД из шаблона с помощью DBCA
         :param newsid: sid для создаваемой БД
         :param oradata: значение параметра db_create_file_dest. Т.е. расположение файлов БД
         :param nls: кодировка базы данных
+        :param archive_mode: включить архивный режим или нет
         :param cdb: создаваемая БД контейнерная иди нет. По умолчанию false => БД неконтейнерная.
         """
         self.sid = newsid
         os.environ['ORACLE_SID'] = newsid
-        dbca_rsp = 'dbca.' + self.oraver + '.rsp.j2'  # шаблон response file для DBCA. Формат dbca.12102.rsp.j2
-        dbca_dbt = 'dbca.' + self.oraver + '.dbt.j2'  # j2 шаблон для шаблона dbca в dbt
+        dbca_rsp = 'dbca_' + self.oraver + '.rsp.j2'  # шаблон response file для DBCA. Формат dbca.12102.rsp.j2
+        #dbca_tpl= 'General_Purpose.{}.dbc.j2'.format(self.oraver)  # j2 шаблон для шаблона dbca в dbc
+        if cdb:
+            dfb_file = 'db_{}_cdb_{}.dfb'.format(self.oraver, nls)
+        else:
+            dfb_file = 'db_{}_noncdb_{}.dfb'.format(self.oraver, nls)
+
+        if files_exists(os.path.join(self.oh_templates, dfb_file) + '*'):  # Если шаблон существует по стандартному пути
+            dbca_tpl = dfb_file.replace('_{}.dfb'.format(nls), '.dbc.j2')
+            dfb_exists = True
+        else:
+            dbca_tpl = 'db_{}.dbt.j2'.format(self.oraver)
+            dfb_exists = False
+
+        # dbca_tpl = 'dbca.{}.dbt.j2'.format(self.oraver)
         rsp_file = os.path.join('/tmp', dbca_rsp.replace('.j2', ''))  # response файл полученный из шаблона
-        dbt_file = os.path.join('/tmp', dbca_dbt.replace('.j2', ''))
+        tpl_file = os.path.join('/tmp', dbca_tpl.replace('.j2', ''))
         self.init_param.update({'oradata': oradata,
                                 'sid': self.sid,
                                 'nls_characterset': nls,
                                 'oracle_base': self.oracle_base,
                                 'oracle_home': self.oracle_home,
-                                'template': dbt_file,
+                                'template':  tpl_file,  # dbca_tpl.replace('.j2', ''),
                                 'shared_pool_size': '1G',
+                                'archive_mode': archive_mode,
                                 'cdb': cdb})
         log_adapter.debug(self.init_param)
-        dbca_cmd = os.path.join(self.oracle_home,'bin','dbca') + ' -createDatabase -silent -responseFile ' + rsp_file
+        dbca_cmd = os.path.join(self.oracle_home, 'bin', 'dbca') + ' -createDatabase -silent -responseFile ' + rsp_file
         # создание response файла из шаблона
         orautils.gen_from_tpl(TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
-        orautils.gen_from_tpl(TPL_DIR, dbca_dbt, out_file=dbt_file, **self.init_param)
+        orautils.gen_from_tpl(TPL_DIR, dbca_tpl, out_file=tpl_file, **self.init_param)
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
-        #shutil.copy2(dbca_tmpl,self.oh_templates)
+        # shutil.copy2(tpl_file, self.oh_templates)
         dirs_create(oradata)
         self._run_cmd(dbca_cmd)
         self.connection()
@@ -527,9 +569,10 @@ class LocalDb(Db):
         # hotfix 0.1.3
         # в 12.2.0.1 не создаются файлы в шаблоне dbt. Ковырялся не смог понять почему, поэтому добавляю
         # файлы уже после создания БД.
-        for sql in get_sql('add_datafiles.sql'):
-            self.cur().ddl_execute(sql)
-        cleanout(rsp_file, dbt_file)
+        if not dfb_exists:
+            for sql in get_sql('add_datafiles.sql'):
+                self.cur().ddl_execute(sql)
+        # cleanout(rsp_file, tpl_file)
 
     @decorator_datapatch()
     def _create(self, newsid, oradata, fn_run, fn_run_args=(), fn_pre=None, fn_pre_args=()):
