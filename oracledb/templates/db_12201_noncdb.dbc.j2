@@ -1,0 +1,109 @@
+<?xml version = '1.0'?>
+<DatabaseTemplate name="db_12201_noncdb" description="" version="12.2.0.1.0">
+   <CommonAttributes>
+      <option name="OMS" value="false"/>
+      <option name="JSERVER" value="true"/>
+      <option name="SPATIAL" value="false"/>
+      <option name="IMEDIA" value="false"/>
+      <option name="ORACLE_TEXT" value="true"/>
+      <option name="SAMPLE_SCHEMA" value="false"/>
+      <option name="CWMLITE" value="false"/>
+      <option name="APEX" value="false"/>
+      <option name="DV" value="false"/>
+   </CommonAttributes>
+   <Variables/>
+   <CustomScripts Execute="false"/>
+   <InitParamAttributes>
+      <InitParams>
+         <initParam name="cluster_database" value="FALSE"/>
+         <initParam name="db_create_file_dest" value="{{ oradata }}"/>
+         <initParam name="db_name" value=""/>
+         <initParam name="db_domain" value=""/>
+         <initParam name="dispatchers" value="(PROTOCOL=TCP) (SERVICE={{ sid }}XDB)"/>
+         <initParam name="audit_file_dest" value="{{ oracle_base }}/admin/{{ sid }}/adump"/>
+         <initParam name="compatible" value="12.2.0.1"/>
+         <initParam name="shared_pool_size" value="1073741824"/>
+         <initParam name="remote_login_passwordfile" value="EXCLUSIVE"/>
+         <initParam name="db_create_online_log_dest_1" value="{{ oradata }}"/>
+         <initParam name="job_queue_processes" value="50"/>
+         <initParam name="sga_target" value="2147483648"/>
+         <initParam name="parallel_min_servers" value="0"/>
+         <initParam name="processes" value="500"/>
+         <initParam name="undo_tablespace" value="UNDOTBS1"/>
+         <initParam name="control_files" value="(&quot;{{ oradata }}/o1_mf_fv8d12vn_.ctl&quot;)"/>
+         <initParam name="diagnostic_dest" value="{{ oracle_base }}"/>
+         <initParam name="db_recovery_file_dest" value="/dbfra"/>
+         <initParam name="audit_trail" value="DB"/>
+         <initParam name="nls_territory" value="AMERICA"/>
+         <initParam name="db_block_size" value="8192"/>
+         <initParam name="open_cursors" value="300"/>
+         <initParam name="nls_language" value="AMERICAN"/>
+         <initParam name="db_recovery_file_dest_size" value="107374182400"/>
+         <initParam name="pga_aggregate_target" value="1073741824"/>
+         <initParam name="_trace_files_public" value="TRUE"/>
+      </InitParams>
+      <MiscParams>
+         <customSGA>false</customSGA>
+         <dataVaultEnabled>false</dataVaultEnabled>
+         <characterSet>CL8ISO8859P5</characterSet>
+         <nationalCharacterSet>AL16UTF16</nationalCharacterSet>
+         <archiveLogMode>{{ archive_mode|lower }}</archiveLogMode>
+         <initParamFileName>{{ oracle_base }}/admin/{{ sid }}/pfile/init.ora</initParamFileName>
+      </MiscParams>
+      <SPfile useSPFile="true">{{ oracle_home }}/dbs/spfile{{ sid }}.ora</SPfile>
+   </InitParamAttributes>
+   <StorageAttributes>
+      <DataFiles>
+         <Location>{{ oracle_home }}/assistants/dbca/templates/db_12201_noncdb_CL8ISO8859P5.dfb</Location>
+         <SourceDBName cdb="false">{{ sid }}</SourceDBName>
+         <Name id="2" Tablespace="SYSAUX" Contents="PERMANENT" Size="400" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_sysaux_fv8d19nl_.dbf</Name>
+         <Name id="7" Tablespace="SYSAUX" Contents="PERMANENT" Size="400" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_sysaux_fv8fkqg8_.dbf</Name>
+         <Name id="1" Tablespace="SYSTEM" Contents="PERMANENT" Size="784" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_system_fv8d14yx_.dbf</Name>
+         <Name id="4" Tablespace="SYSTEM" Contents="PERMANENT" Size="400" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_system_fv8fknol_.dbf</Name>
+         <Name id="5" Tablespace="SYSTEM" Contents="PERMANENT" Size="400" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_system_fv8fkp6r_.dbf</Name>
+         <Name id="6" Tablespace="SYSTEM" Contents="PERMANENT" Size="400" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_system_fv8fkpw8_.dbf</Name>
+         <Name id="3" Tablespace="UNDOTBS1" Contents="UNDO" Size="370" autoextend="true" blocksize="8192" con_id="0">{{ oradata }}/o1_mf_undotbs1_fv8d1bsw_.dbf</Name>
+      </DataFiles>
+      <TempFiles>
+         <Name id="1" Tablespace="TEMP" Contents="TEMPORARY" Size="200" con_id="0">{{ oradata }}/o1_mf_temp_fv8d1c5l_.tmp</Name>
+      </TempFiles>
+      <ControlfileAttributes id="Controlfile">
+         <maxDatafiles>100</maxDatafiles>
+         <maxLogfiles>16</maxLogfiles>
+         <maxLogMembers>3</maxLogMembers>
+         <maxLogHistory>292</maxLogHistory>
+         <maxInstances>8</maxInstances>
+         <image name="o1_mf_fv8d12vn_.ctl" filepath="{{ oradata }}/"/>
+      </ControlfileAttributes>
+      <RedoLogGroupAttributes id="1">
+         <reuse>false</reuse>
+         <fileSize unit="KB">204800</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="o1_mf_1_fv8d131j_.log" filepath="{{ oradata }}/"/>
+      </RedoLogGroupAttributes>
+      <RedoLogGroupAttributes id="2">
+         <reuse>false</reuse>
+         <fileSize unit="KB">204800</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="o1_mf_2_fv8d138o_.log" filepath="{{ oradata }}/"/>
+      </RedoLogGroupAttributes>
+      <RedoLogGroupAttributes id="3">
+         <reuse>false</reuse>
+         <fileSize unit="KB">204800</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="o1_mf_3_fv8d13jd_.log" filepath="{{ oradata }}/"/>
+      </RedoLogGroupAttributes>
+      <RedoLogGroupAttributes id="4">
+         <reuse>false</reuse>
+         <fileSize unit="KB">204800</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="o1_mf_4_fv8d13s2_.log" filepath="{{ oradata }}/"/>
+      </RedoLogGroupAttributes>
+      <RedoLogGroupAttributes id="5">
+         <reuse>false</reuse>
+         <fileSize unit="KB">204800</fileSize>
+         <Thread>1</Thread>
+         <member ordinal="0" memberName="o1_mf_5_fv8d142q_.log" filepath="{{ oradata }}/"/>
+      </RedoLogGroupAttributes>
+   </StorageAttributes>
+</DatabaseTemplate>
