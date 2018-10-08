@@ -554,6 +554,11 @@ class LocalDb(Db):
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
         # shutil.copy2(tpl_file, self.oh_templates)
         dirs_create(oradata)
+        log_adapter.info('CDB:%s   NLS:%s    Archive_mode:%s    Oradata:%s', cdb, nls, archive_mode, oradata)
+        if dfb_exists:
+            log_adapter.info('Type of DBCA Templates:SEED   path:%s', tpl_file)
+        else:
+            log_adapter.info('Type of DBCA Templates:NONSEED   path:%s', tpl_file)
         self._run_cmd(dbca_cmd)
         self.connection()
         # Не устанавливаются некоторые параметры, указанные в шаблоне для dbca.
@@ -572,7 +577,7 @@ class LocalDb(Db):
         if not dfb_exists:
             for sql in get_sql('add_datafiles.sql'):
                 self.cur().ddl_execute(sql)
-        # cleanout(rsp_file, tpl_file)
+        cleanout(rsp_file, tpl_file)
 
     @decorator_datapatch()
     def _create(self, newsid, oradata, fn_run, fn_run_args=(), fn_pre=None, fn_pre_args=()):
