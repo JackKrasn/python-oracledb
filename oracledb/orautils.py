@@ -5,7 +5,9 @@ import dblogger
 import jinja2
 import dbexceptions
 from StringIO import StringIO
-from config import *
+import re
+import config
+import os
 
 
 logger = logging.getLogger('oracledb.orautils')
@@ -40,7 +42,7 @@ def oratab_exists(sid):
     Проверяет есть запись в oratab для указанного sid
     :return: true если есть строка в ortab, иначе false
     """
-    with open(ORATAB, 'r') as f:
+    with open(config.ORATAB, 'r') as f:
         m = re.search(r"^{}:".format(sid), f.read(), re.M)
         if not m:
             return False
@@ -98,7 +100,7 @@ def oratab_add(sid, oracle_home):
     """
     oratab_line = '\n' + sid + ':' + oracle_home + ':N'
     if not oratab_exists(sid):
-        with open(ORATAB, 'a') as file:
+        with open(config.ORATAB, 'a') as file:
             file.write(oratab_line)
             return True
     else:
