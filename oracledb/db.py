@@ -11,7 +11,8 @@ import dblogger
 import orautils
 import glob
 import sys
-from config import *
+import config
+import os
 
 logger = logging.getLogger('oracledb.db')
 log_adapter = dblogger.DBLoggerAdapter(logger)
@@ -19,12 +20,12 @@ cx_Oracle.Error = dbexceptions.Error
 
 
 def slurp(filename):
-    with open(os.path.join(SQL_DIR, filename)) as f:
+    with open(os.path.join(config.SQL_DIR, filename)) as f:
         return f.read()
 
 
 def get_sql(filename):
-    with open(os.path.join(SQL_DIR, filename)) as f:
+    with open(os.path.join(config.SQL_DIR, filename)) as f:
         return tuple(s.strip() for s in f.read().rstrip().rstrip(';').split(';'))
 
 
@@ -445,7 +446,7 @@ class LocalDb(Db):
         :return: путь к pfile
         """
         pfile = os.path.join(self.oracle_home, 'dbs', 'init{}.ora'.format(self.sid))
-        orautils.gen_from_tpl(TPL_DIR, 'init.ora.j2', out_file=pfile, **self.init_param)
+        orautils.gen_from_tpl(config.TPL_DIR, 'init.ora.j2', out_file=pfile, **self.init_param)
         return pfile
 
     def orapw_create(self):
@@ -479,7 +480,7 @@ class LocalDb(Db):
             'bkploc': bkp_loc
         }
         # формирование скрипта из шаблона
-        orautils.gen_from_tpl(TPL_DIR, rman_tpl, out_file=rman_script, **param)
+        orautils.gen_from_tpl(config.TPL_DIR, rman_tpl, out_file=rman_script, **param)
         self.run_rman('@' + rman_script, 'auxiliary')
 
     def prepare_env(self):
@@ -495,7 +496,7 @@ class LocalDb(Db):
         self.orapw_create()
         pfile = self.pfile_create()
         # необходимо создать каталоги adump и  oradata
-        adump_dir = os.path.join(ORA_ADMIN, self.sid, 'adump')
+        adump_dir = os.path.join(config.ORA_ADMIN, self.sid, 'adump')
         dirs_create(self.init_param['oradata'], adump_dir)
         self.nomount()
         # Создание spfile из pfile. Если spfile уже существует, то исключение обработает ошибку ORA-32002
@@ -549,11 +550,16 @@ class LocalDb(Db):
         log_adapter.debug(self.init_param)
         dbca_cmd = os.path.join(self.oracle_home, 'bin', 'dbca') + ' -createDatabase -silent -responseFile ' + rsp_file
         # создание response файла из шаблона
-        orautils.gen_from_tpl(TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
-        orautils.gen_from_tpl(TPL_DIR, dbca_tpl, out_file=tpl_file, **self.init_param)
+        orautils.gen_from_tpl(config.TPL_DIR, dbca_rsp, out_file=rsp_file, **self.init_param)
+        orautils.gen_from_tpl(config.TPL_DIR, dbca_tpl, out_file=tpl_file, **self.init_param)
         # Копирование шаблона из каталога со всеми шаблонами в каталог шаблонов dbca, чтобы его смог подтянуть dbca
         # shutil.copy2(tpl_file, self.oh_templates)
         dirs_create(oradata)
+        log_adapter.info('CDB:%s   NLS:%s    Archive_mode:%s    Oradata:%s', cdb, nls, archive_mode, oradata)
+        if dfb_exists:
+            log_adapter.info('Type of DBCA Templates:SEED   path:%s', tpl_file)
+        else:
+            log_adapter.info('Type of DBCA Templates:NONSEED   path:%s', tpl_file)
         self._run_cmd(dbca_cmd)
         self.connection()
         # Не устанавливаются некоторые параметры, указанные в шаблоне для dbca.
@@ -572,7 +578,7 @@ class LocalDb(Db):
         if not dfb_exists:
             for sql in get_sql('add_datafiles.sql'):
                 self.cur().ddl_execute(sql)
-        # cleanout(rsp_file, tpl_file)
+        cleanout(rsp_file, tpl_file)
 
     @decorator_datapatch()
     def _create(self, newsid, oradata, fn_run, fn_run_args=(), fn_pre=None, fn_pre_args=()):
@@ -641,7 +647,7 @@ class LocalDb(Db):
         self.cur().ddl_execute('alter user sys identified by sys')
 
         #delete database
-        cmd = '{}/bin/dbca -silent -deleteDatabase -sourceDB {} -forceArchiveLogDeletion ' \
+        cmd = '{}/bin/dbca -silent -deleteDatabase -sourceDB {} ' \
               '-sysDBAUserName sys -sysDBAPassword sys '.format(self.oracle_home, self.sid)
 
         # log_adapter.info(cmd)
@@ -689,7 +695,7 @@ class LocalDb(Db):
 
         dirs_create(bkploc)
         # формирование скрипта из шаблона
-        orautils.gen_from_tpl(TPL_DIR, rman_tpl, out_file=rman_script, **param)
+        orautils.gen_from_tpl(config.TPL_DIR, rman_tpl, out_file=rman_script, **param)
         rc = self.run_rman('@' + rman_script)
 
         # if self.info_instance['STATUS'] != 'OPEN':

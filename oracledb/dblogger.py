@@ -103,5 +103,5 @@ rotating_file.setFormatter(formatter)
 rotating_file.doRollover()
 console.addFilter(ConsoleShutUp())
 root_logger.addHandler(console)
-root_logger.addHandler(rotating_file)
+# root_logger.addHandler(rotating_file)
 
