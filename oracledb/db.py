@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import distutils.dir_util
@@ -13,6 +13,7 @@ import glob
 import sys
 import config
 import os
+import re
 
 logger = logging.getLogger('oracledb.db')
 log_adapter = dblogger.DBLoggerAdapter(logger)
@@ -193,17 +194,22 @@ class Db(object):
 
     def get_info_db(self):
         cur = self.cur()
-        if self.info_instance['STATUS'] != 'STARTED': #get information from v$database. Database must be in mount mode
+        if self.info_instance['STATUS'] in ('MOUNTED', 'OPEN'):  # get information from v$database.
+                                                                    # Database must be in mount mode
             self.info_db = cur.bind_cursor_query(slurp('info_db.sql')).out_list()[0]
-            # Получить список компонент, которые установлены. ВНачале получаем список словарей.Структура вида
-            # [{},{}], а затем преобразую в словарь {COMP_ID:STATUS}
-            self.info_comp = {id['COMP_ID']: id['STATUS'] for id in cur.bind_cursor_query(slurp('info_comp.sql')).out_list()}
             self.info_con = cur.binds_query(slurp('info_con.sql'), {'CON_NAME': 'STRING', 'CON_ID': 'NUMBER',
                                                                     'CON_TYPE': 'STRING'})
             self.info_db.update(self.info_con)
 
+    def get_info_comp(self):
+        cur = self.cur()
+        if self.info_instance['STATUS'] == 'OPEN':
+            # Получить список компонент, которые установлены. ВНачале получаем список словарей.Структура вида
+            # [{},{}], а затем преобразую в словарь {COMP_ID:STATUS}
+            self.info_comp = {id['COMP_ID']: id['STATUS'] for id in cur.bind_cursor_query(slurp('info_comp.sql')).out_list()}
+
     def connection(self):
-        if self.conn  is None:
+        if self.conn is None:
             try:
                 self.conn = MyConnection(self.conn_string, mode=cx_Oracle.SYSDBA)
             except cx_Oracle.DatabaseError, e:
@@ -213,7 +219,8 @@ class Db(object):
 
         self.get_info_instance()
         self.get_info_db()
-        self.get_info_cft()
+        self.get_info_comp()
+        # self.get_info_cft()
         return self.conn
 
     def connection_init(self):
@@ -221,7 +228,8 @@ class Db(object):
             self.conn = MyConnection(self.conn_string, mode=cx_Oracle.SYSDBA)
             self.get_info_instance()
             self.get_info_db()
-            self.get_info_cft()
+            self.get_info_comp()
+            # self.get_info_cft()
         except cx_Oracle.DatabaseError, e:
             error, = e.args
             if error.code == 1034:
@@ -246,15 +254,15 @@ class Db(object):
         cmd = self.rman + connect_string + ' {}'.format(script)
         return self._run_cmd(cmd, stdoutDisable=stdoutDisable)
 
-    def get_info_cft(self):
-        """
-        Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
-        :return:
-        """
-        cur = self.cur()
-        if self.info_instance['STATUS'] != 'STARTED':
-            self.info_cft = cur.binds_query(slurp('info_cft.sql'),
-                                            {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
+    # def get_info_cft(self):
+    #     """
+    #     Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
+    #     :return:
+    #     """
+    #     cur = self.cur()
+    #     if self.info_instance['STATUS'] != 'STARTED':
+    #         self.info_cft = cur.binds_query(slurp('info_cft.sql'),
+    #                                         {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
 
     def pdb_close(self, con_name=''):
         """
@@ -330,11 +338,12 @@ def decorator_startup(func):
     """
     def wrapper(method_to_decorate):
         def wrapped(self):
-            if self.conn is None: # conn заполняется в конструкторе класса. Если оно None, значит, инстансов остановлен
+            if self.conn is None:  # conn заполняется в конструкторе класса. Если оно None, значит, инстанс остановлен
                 func(self)
-            method_to_decorate(self) # декорируемый метод
+            method_to_decorate(self)  # декорируемый метод
             self.get_info_instance()  # собрать информацию об инстансе
-            self.get_info_db() # собрать информацию о БД
+            self.get_info_db()  # собрать информацию о БД
+            self.get_info_comp()
         return wrapped
     return wrapper
 
