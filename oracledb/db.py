@@ -220,7 +220,7 @@ class Db(object):
         self.get_info_instance()
         self.get_info_db()
         self.get_info_comp()
-        # self.get_info_cft()
+        self.get_info_cft()
         return self.conn
 
     def connection_init(self):
@@ -229,7 +229,7 @@ class Db(object):
             self.get_info_instance()
             self.get_info_db()
             self.get_info_comp()
-            # self.get_info_cft()
+            self.get_info_cft()
         except cx_Oracle.DatabaseError, e:
             error, = e.args
             if error.code == 1034:
@@ -254,15 +254,15 @@ class Db(object):
         cmd = self.rman + connect_string + ' {}'.format(script)
         return self._run_cmd(cmd, stdoutDisable=stdoutDisable)
 
-    # def get_info_cft(self):
-    #     """
-    #     Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
-    #     :return:
-    #     """
-    #     cur = self.cur()
-    #     if self.info_instance['STATUS'] != 'STARTED':
-    #         self.info_cft = cur.binds_query(slurp('info_cft.sql'),
-    #                                         {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
+    def get_info_cft(self):
+        """
+        Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
+        :return:
+        """
+        cur = self.cur()
+        if self.info_instance['STATUS'] != 'STARTED':
+            self.info_cft = cur.binds_query(slurp('info_cft.sql'),
+                                            {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
 
     def pdb_close(self, con_name=''):
         """
