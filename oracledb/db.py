@@ -134,10 +134,10 @@ class MyConnection(cx_Oracle.Connection):
 
 class Listener(object):
 
-    def __init__(self, listname, oracle_version):
+    def __init__(self, listname):
         self.listname = listname
-        sid = 'o' + str(oracle_version)
-        orautils.oraenv(sid)
+        # sid = 'o' + str(oracle_version)
+        # orautils.oraenv(sid)
         self.oracle_home = os.environ['ORACLE_HOME']
         self.lsnr_ctl = os.path.join(self.oracle_home, 'bin', 'lsnrctl')
 
