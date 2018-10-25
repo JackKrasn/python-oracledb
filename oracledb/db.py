@@ -114,7 +114,7 @@ class MyCursor(cx_Oracle.Cursor):
     def ddl_execute(self, statement, oerr=None):
         log_adapter.debug('%s',statement)
         try:
-            self.execute(statement)
+            return self.execute(statement)
         except cx_Oracle.DatabaseError, e:
             error, = e.args
             if error.code == oerr:
@@ -208,6 +208,40 @@ class Db(object):
             # [{},{}], а затем преобразую в словарь {COMP_ID:STATUS}
             self.info_comp = {id['COMP_ID']: id['STATUS'] for id in cur.bind_cursor_query(slurp('info_comp.sql')).out_list()}
 
+    def get_info_cft(self):
+        """
+        Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
+        :return:
+        """
+        cur = self.cur()
+        if self.info_instance['STATUS'] != 'STARTED':
+            self.info_cft = cur.binds_query(slurp('info_cft.sql'),
+                                            {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
+            owner = cur.ddl_execute("select value from audm.settings where name='OWNERS'").fetchone()[0]
+            self.info_cft.update({'OWNER': owner})
+
+    def cft_chfio(self, fio_home_dir):
+        cur = self.cur()
+        # self.get_info_cft()
+        trg_name = 'PROFILES_CHANGES'
+        sql_string = 'update {}.profiles set value='.format(self.info_cft['OWNER'])
+        trigger = cur.ddl_execute("select owner,status from dba_triggers where trigger_name='{}'".format(trg_name)).out_list()[0]
+        if trigger['STATUS'] == 'ENABLED':
+            cur.ddl_execute("alter trigger {}.{} disable".format(trigger['OWNER'], trg_name))
+
+        cur.ddl_execute("{}'{}' where profile='DEFAULT' and resource_name='FIO_HOME_DIR'".format(sql_string,
+                                                                                                 fio_home_dir))
+        cur.ddl_execute("{}'{}' where profile='DEFAULT' and resource_name='FIO_ROOT_DIR'".format(sql_string,
+                                                                                                 fio_home_dir))
+        cur.ddl_execute("{}'/u/tools/fio_{}_{}.log' where profile='DEFAULT' and "
+                        "resource_name='FIO_LOG_FILE' ".format(sql_string,
+                                                               self.info_con['CON_NAME'].lower(),
+                                                               self.info_cft['OWNER'].lower()))
+        cur.ddl_execute("{}'/tmp' where profile='DEFAULT' and resource_name='FIO_TEMP_DIR'".format(sql_string))
+        self.conn.commit()
+        if trigger['STATUS'] == 'ENABLED':
+            cur.ddl_execute("alter trigger {}.{} enable".format(trigger['OWNER'], trg_name))
+
     def connection(self):
         if self.conn is None:
             try:
@@ -253,16 +287,6 @@ class Db(object):
         connect_string = ' {} '.format(conn) + self.conn_string
         cmd = self.rman + connect_string + ' {}'.format(script)
         return self._run_cmd(cmd, stdoutDisable=stdoutDisable)
-
-    def get_info_cft(self):
-        """
-        Информация о платформе ЦФТ-Банк развитие. Расположение FIO, версии ТЯ и ПЯ
-        :return:
-        """
-        cur = self.cur()
-        if self.info_instance['STATUS'] != 'STARTED':
-            self.info_cft = cur.binds_query(slurp('info_cft.sql'),
-                                            {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
 
     def pdb_close(self, con_name=''):
         """
