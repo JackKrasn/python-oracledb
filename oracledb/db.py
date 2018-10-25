@@ -214,9 +214,11 @@ class Db(object):
         :return:
         """
         cur = self.cur()
-        if self.info_instance['STATUS'] != 'STARTED':
+        if self.info_instance['STATUS'] in ('MOUNTED', 'OPEN'):
             self.info_cft = cur.binds_query(slurp('info_cft.sql'),
                                             {'FIO_HOME_DIR': 'STRING', 'CORE_VER': 'STRING', 'APP_VER': 'STRING'})
+
+        if self.info_instance['STATUS'] == 'OPEN':
             owner = cur.ddl_execute("select value from audm.settings where name='OWNERS'").fetchone()[0]
             self.info_cft.update({'OWNER': owner})
 
@@ -368,6 +370,7 @@ def decorator_startup(func):
             self.get_info_instance()  # собрать информацию об инстансе
             self.get_info_db()  # собрать информацию о БД
             self.get_info_comp()
+            self.get_info_cft()
         return wrapped
     return wrapper
 
