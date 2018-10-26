@@ -233,8 +233,7 @@ class Db(object):
 
         cur.ddl_execute("{}'{}' where profile='DEFAULT' and resource_name='FIO_HOME_DIR'".format(sql_string,
                                                                                                  fio_home_dir))
-        cur.ddl_execute("{}'{}' where profile='DEFAULT' and resource_name='FIO_ROOT_DIR'".format(sql_string,
-                                                                                                 fio_home_dir))
+        cur.ddl_execute("{}'/ibs' where profile='DEFAULT' and resource_name='FIO_ROOT_DIR'".format(sql_string))
         cur.ddl_execute("{}'/u/tools/fio_{}_{}.log' where profile='DEFAULT' and "
                         "resource_name='FIO_LOG_FILE' ".format(sql_string,
                                                                self.info_con['CON_NAME'].lower(),
